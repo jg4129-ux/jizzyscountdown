@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Jizzy's Countdowns</title>
+<title>Event Countdowns</title>
 <meta name="description" content="Sleek, mobile-first multi-event countdowns." />
 <style>
   :root{
@@ -173,20 +173,42 @@ function createCard(ev){
 const grid = document.getElementById('grid');
 const rows = events.map(ev => { const {card, slots} = createCard(ev); grid.appendChild(card); return {ev, slots, target: new Date(ev.dateISO), card}; });
 
+let ticker;
+
 function tick(){
   const now = new Date();
+
   rows.forEach(({slots, target, card})=>{
     const d = diffAsParts(now, target);
+
+    if (d.done) {
+      if (!card.classList.contains('done')) {
+        card.classList.add('done');
+        const titleEl = card.querySelector('.title');
+        titleEl.textContent = titleEl.textContent.replace(/\s*• Completed$/, '') + ' • Completed';
+        card.style.opacity = 0.6;
+        slots.months.textContent  = '00';
+        slots.days.textContent    = '00';
+        slots.hours.textContent   = '00';
+        slots.minutes.textContent = '00';
+        slots.seconds.textContent = '00';
+      }
+      return; // skip further updates for completed cards
+    }
+
     slots.months.textContent  = String(d.months).padStart(2,'0');
     slots.days.textContent    = String(d.days).padStart(2,'0');
     slots.hours.textContent   = String(d.hours).padStart(2,'0');
     slots.minutes.textContent = String(d.minutes).padStart(2,'0');
     slots.seconds.textContent = String(d.seconds).padStart(2,'0');
-    if (d.done){ card.querySelector('.title').textContent += " • Completed"; card.style.opacity = .6; }
   });
+
+  const allDone = rows.every(({card}) => card.classList.contains('done'));
+  if (allDone && ticker) clearInterval(ticker);
 }
+
 tick();
-setInterval(tick, 1000);
+ticker = setInterval(tick, 1000);
 </script>
 </body>
 </html>
