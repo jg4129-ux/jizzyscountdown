@@ -14,6 +14,11 @@
     --accent: #66e3c4;
     --ring: #253142;
     --shadow: 0 10px 30px rgba(0,0,0,.25);
+    --seg-bg: #1a2333;
+    --seg-active: #253142;
+    --seg-text: #9fb0c3;
+    --seg-active-text: #e8eef6;
+    --tab-border: #1e2d3f;
   }
   @media (prefers-color-scheme: light){
     :root{
@@ -24,6 +29,11 @@
       --accent: #0fb389;
       --ring: #e7edf4;
       --shadow: 0 6px 16px rgba(10,19,32,.08);
+      --seg-bg: #edf1f7;
+      --seg-active: #ffffff;
+      --seg-text: #5b6a7a;
+      --seg-active-text: #0a1320;
+      --tab-border: #e2e8f0;
     }
   }
   *{box-sizing:border-box}
@@ -44,62 +54,226 @@
   }
   header{
     display:flex; align-items:center; justify-content:space-between; gap:12px;
-    margin-bottom:18px;
+    margin-bottom:16px;
+    flex-wrap:wrap;
   }
   h1{
     margin:0; font-size:20px; font-weight:700; letter-spacing:.2px;
   }
+  .header-right {
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  }
+  .tz-label {
+    font-size:12px; color:var(--muted);
+  }
+
+  /* Months/Days segmented control */
+  .seg-control {
+    display:flex;
+    align-items:center;
+    background:var(--seg-bg);
+    border:1px solid var(--ring);
+    border-radius:10px;
+    padding:3px;
+    gap:2px;
+    position:relative;
+    transition: opacity .2s ease;
+  }
+  .seg-control.hidden-ctrl {
+    opacity:0;
+    pointer-events:none;
+  }
+  .seg-btn {
+    position:relative; z-index:1;
+    background:none; border:none; cursor:pointer;
+    padding:5px 12px;
+    border-radius:7px;
+    font-size:12px; font-weight:600;
+    color:var(--seg-text);
+    transition:color .2s ease;
+    white-space:nowrap;
+    letter-spacing:.2px;
+  }
+  .seg-btn.active {
+    color:var(--seg-active-text);
+  }
+  .seg-slider {
+    position:absolute;
+    top:3px; left:3px;
+    height:calc(100% - 6px);
+    background:var(--seg-active);
+    border:1px solid var(--ring);
+    border-radius:7px;
+    box-shadow:0 1px 4px rgba(0,0,0,.15);
+    transition:transform .22s cubic-bezier(.4,0,.2,1), width .22s cubic-bezier(.4,0,.2,1);
+    pointer-events:none;
+  }
+
+  /* Tab bar */
+  .tab-bar {
+    display:flex;
+    align-items:stretch;
+    border-bottom:1px solid var(--tab-border);
+    margin-bottom:20px;
+  }
+  .tab-btn {
+    background:none; border:none; cursor:pointer;
+    padding:10px 18px 11px;
+    font-size:14px; font-weight:600;
+    color:var(--muted);
+    position:relative;
+    transition:color .18s ease;
+    display:flex; align-items:center; gap:7px;
+    white-space:nowrap;
+  }
+  .tab-btn::after {
+    content:'';
+    position:absolute;
+    bottom:-1px; left:0; right:0;
+    height:2px;
+    background:var(--accent);
+    border-radius:2px 2px 0 0;
+    opacity:0;
+    transform:scaleX(.6);
+    transition:opacity .18s ease, transform .18s ease;
+  }
+  .tab-btn.active { color:var(--ink); }
+  .tab-btn.active::after { opacity:1; transform:scaleX(1); }
+  .tab-badge {
+    display:inline-flex; align-items:center; justify-content:center;
+    background:var(--seg-bg);
+    border:1px solid var(--ring);
+    border-radius:20px;
+    font-size:11px; font-weight:700;
+    min-width:20px; height:20px;
+    padding:0 6px;
+    color:var(--muted);
+    transition:background .2s, color .2s, border-color .2s;
+  }
+  .tab-btn.active .tab-badge {
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#0b0f14;
+  }
+
+  /* Grid */
   .grid{
     display:grid;
     grid-template-columns:1fr;
-    gap:14px;
+    gap:16px;
   }
-  @media(min-width:700px){
+  .grid[hidden]{ display:none; }
+  @media(min-width:560px){
     .grid{ grid-template-columns:1fr 1fr; }
   }
-  @media(min-width:1024px){
+  @media(min-width:900px){
     .grid{ grid-template-columns:1fr 1fr 1fr; }
   }
+
+  /* Card — vertical poster layout */
   .card{
     background:var(--card);
     border:1px solid var(--ring);
-    border-radius:14px;
+    border-radius:16px;
     box-shadow:var(--shadow);
-    padding:14px;
-    display:flex; gap:12px; align-items:center;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
   }
-  .thumb{
-    width:58px; height:58px; flex:none; border-radius:12px; overflow:hidden;
-    border:1px solid var(--ring); background:#1c2430; display:grid; place-items:center;
+  .card.done-card { opacity:0.55; }
+
+  /* Hero image area */
+  .hero {
+    position:relative;
+    width:100%;
+    height:200px;
+    flex:none;
+    background:#1c2430;
+    overflow:hidden;
   }
-  .thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
-  .meta{ flex:1; min-width:0; }
-  .title{
-    font-size:16px; font-weight:700; margin:0 0 2px 0;
+  .hero img {
+    width:100%; height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  /* Gradient scrim — bottom 60% of image fades to card bg */
+  .hero::after {
+    content:'';
+    position:absolute;
+    inset:0;
+    background: linear-gradient(
+      to bottom,
+      transparent 45%,
+      rgba(18,24,33,0.6) 68%,
+      rgba(18,24,33,0.95) 85%,
+      var(--card) 100%
+    );
+  }
+  /* Title sits on top of the scrim */
+  .hero-title {
+    position:absolute;
+    bottom:0px; left:14px; right:14px;
+    z-index:1;
+    font-size:22px; font-weight:800;
+    color:#fff;
+    text-shadow: 0 1px 6px rgba(0,0,0,.5);
+    margin:0;
+    line-height:1.2;
+  }
+
+  /* Body below the image */
+  .body {
+    padding:10px 14px 14px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    flex:1;
   }
   .date{
-    font-size:12px; color:var(--muted); margin:0 0 8px 0;
+    font-size:12px; color:var(--muted); margin:0;
   }
   .timer{
-    display:flex; gap:8px; flex-wrap:wrap;
+    display:flex; gap:7px;
   }
   .pill{
     background:transparent;
     border:1px solid var(--ring);
     border-radius:10px;
-    padding:8px 10px;
-    min-width:76px;
+    padding:7px 10px;
+    flex:1;
+    min-width:0;
     text-align:center;
+    overflow:hidden;
+    transition:
+      max-width .28s cubic-bezier(.4,0,.2,1),
+      opacity .22s cubic-bezier(.4,0,.2,1),
+      padding .28s cubic-bezier(.4,0,.2,1),
+      min-width .28s cubic-bezier(.4,0,.2,1),
+      border-color .22s ease,
+      margin .28s cubic-bezier(.4,0,.2,1);
+  }
+  .pill.hidden {
+    display:none;
   }
   .num{
     font-variant-numeric: tabular-nums;
-    font-size:18px; font-weight:700;
+    font-size:16px; font-weight:700;
     display:block;
   }
   .lab{
-    font-size:11px; color:var(--muted);
+    font-size:8px; color:var(--muted); letter-spacing:-.2px;
+    display:block; width:100%; text-align:center;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   .accent .num{ color:var(--accent); }
+
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align:center;
+    color:var(--muted);
+    font-size:14px;
+    padding:48px 0;
+  }
   footer{
     margin-top:18px; color:var(--muted); font-size:12px; text-align:center;
   }
@@ -108,107 +282,243 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>Upcoming Countdowns</h1>
-    <div aria-hidden="true" style="font-size:12px;color:var(--muted);">Times shown in your local timezone</div>
+    <h1>Event Countdowns</h1>
+    <div class="header-right">
+      <div class="seg-control" id="segControl" role="group" aria-label="Countdown display mode">
+        <div class="seg-slider" id="segSlider"></div>
+        <button class="seg-btn active" id="btnFull" data-mode="full">Months</button>
+        <button class="seg-btn" id="btnCompact" data-mode="compact">Days</button>
+      </div>
+      <div class="tz-label" aria-hidden="true">Times shown in your local timezone</div>
+    </div>
   </header>
 
-  <div id="grid" class="grid" role="list"></div>
+  <div class="tab-bar" role="tablist">
+    <button class="tab-btn active" id="tabUpcoming" role="tab" aria-selected="true" aria-controls="grid">Upcoming</button>
+    <button class="tab-btn" id="tabCompleted" role="tab" aria-selected="false" aria-controls="gridCompleted">
+      Completed <span class="tab-badge" id="completedBadge">0</span>
+    </button>
+  </div>
+
+  <div id="grid" class="grid" role="tabpanel" aria-labelledby="tabUpcoming"></div>
+  <div id="gridCompleted" class="grid" role="tabpanel" aria-labelledby="tabCompleted" hidden></div>
 
   <footer>
-    <span>Built by ChatGPT with vanilla HTML/CSS/JS. No tracking, no cookies.</span>
+    <span>Built with vanilla HTML/CSS/JS. No tracking, no cookies.</span>
   </footer>
 </div>
 
 <script>
 const events = [
-  { title: "Las Vegas", dateISO: "2025-09-11T21:00:00-07:00", image: "https://i.ibb.co/HTCLx6Bt/pitbull.jpg?auto=format&fit=crop&w=300&q=60" },
-  { title: "Shipwreck'd", dateISO: "2025-10-18T16:30:00-07:00", image: "https://i.ibb.co/pBKfChJf/pirate.jpg?auto=format&fit=crop&w=300&q=60" },
-  { title: "Djo", dateISO: "2025-10-21T19:00:00-07:00", image: "https://i.ibb.co/F4cgymQ4/IMG-8106.png?auto=format&fit=crop&w=300&q=60" },
-  { title: "Justice x Kaytranada", dateISO: "2025-10-24T19:00:00-07:00", image: "https://i.ibb.co/VcnqFKv7/justice.jpg?auto=format&fit=crop&w=300&q=60" },
-  { title: "Disney World", dateISO: "2025-11-07T23:30:00-08:00", image: "https://i.ibb.co/TxNLm4QF/disneyworld.jpg?auto=format&fit=crop&w=300&q=60" },
-  { title: "Shanghai", dateISO: "2025-11-25T12:00:00-08:00", image: "https://i.ibb.co/chgdsz39/shanghai.jpg?auto=format&fit=crop&w=300&q=60" },
-  { title: "Hawaii", dateISO: "2025-12-01T12:00:00-08:00", image: "https://i.ibb.co/fddYDGR2/hawaii.jpg?auto=format&fit=crop&w=300&q=60" },
-  { title: "Coachella", dateISO: "2026-04-10T14:00:00-07:00", image: "https://i.ibb.co/jPvHJ1vY/coachella.jpg?auto=format&fit=crop&w=300&q=60" },
-  { title: "Stagecoach", dateISO: "2026-04-24T14:00:00-07:00", image: "https://i.ibb.co/0VKzJF6j/stagecoach.jpg?auto=format&fit=crop&w=300&q=60" },
-  { title: "Wedding", dateISO: "2026-09-19T17:00:00-07:00", image: "https://i.ibb.co/HDtGfLnC/Hangar.jpg?auto=format&fit=crop&w=300&q=60" }
+  { title: "Las Vegas",           dateISO: "2025-09-11T21:00:00-07:00", image: "https://i.ibb.co/HTCLx6Bt/pitbull.jpg?auto=format&fit=crop&w=600&q=80" },
+  { title: "Shipwreck'd",         dateISO: "2025-10-18T16:30:00-07:00", image: "https://i.ibb.co/pBKfChJf/pirate.jpg?auto=format&fit=crop&w=600&q=80" },
+  { title: "Djo",                 dateISO: "2025-10-21T19:00:00-07:00", image: "https://i.ibb.co/F4cgymQ4/IMG-8106.png?auto=format&fit=crop&w=600&q=80" },
+  { title: "Justice x Kaytranada",dateISO: "2025-10-24T19:00:00-07:00", image: "https://i.ibb.co/VcnqFKv7/justice.jpg?auto=format&fit=crop&w=600&q=80" },
+  { title: "Disney World",        dateISO: "2025-11-07T23:30:00-08:00", image: "https://i.ibb.co/TxNLm4QF/disneyworld.jpg?auto=format&fit=crop&w=600&q=80" },
+  { title: "Hawaii",              dateISO: "2025-12-01T12:00:00-08:00", image: "https://i.ibb.co/fddYDGR2/hawaii.jpg?auto=format&fit=crop&w=600&q=80" },
+   { title: "Mardi Gras",              dateISO: "2025-12-01T12:00:00-08:00", image: "https://i.ibb.co/k2ZVJjwX/mardigras.jpg?auto=format&fit=crop&w=600&q=80" },
+  { title: "Banana Ball",           dateISO: "2026-03-28T15:00:00-07:00", image: "https://i.ibb.co/Lhvc7TmH/bananaball.jpg?auto=format&fit=crop&w=600&q=80" },
+  { title: "Coachella",           dateISO: "2026-04-10T14:00:00-07:00", image: "https://i.ibb.co/HpGx20P8/coachella.jpg?auto=format&fit=crop&w=600&q=80" },
+  { title: "Stagecoach",          dateISO: "2026-04-24T14:00:00-07:00", image: "https://i.ibb.co/ycjHcQFf/stagecoach.jpg?auto=format&fit=crop&w=600&q=80" },
+  { title: "Wedding",             dateISO: "2026-09-19T17:00:00-07:00", image: "https://i.ibb.co/S4ckDkrh/hangar.jpg?auto=format&fit=crop&w=600&q=80" }
 ];
 
-const fmt = new Intl.DateTimeFormat(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+const COMPACT_HIDDEN = new Set(['months']);
+const fmt = new Intl.DateTimeFormat(undefined, { weekday:'short', year:'numeric', month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
 
 function diffAsParts(now, target){
-  if (target <= now) return {months:0, days:0, hours:0, minutes:0, seconds:0, done:true};
-  let months = (target.getFullYear() - now.getFullYear())*12 + (target.getMonth() - now.getMonth());
-  const tentative = new Date(now);
-  tentative.setMonth(tentative.getMonth() + months);
-  if (tentative > target) { months -= 1; tentative.setMonth(tentative.getMonth() - 1); }
-  let ms = target - tentative;
-  while (ms < 0) { months -= 1; tentative.setMonth(tentative.getMonth() - 1); ms = target - tentative; }
-  const sec = Math.floor(ms/1000);
-  let remaining = sec;
-  const days = Math.floor(remaining / (24*3600)); remaining %= (24*3600);
-  const hours = Math.floor(remaining / 3600); remaining %= 3600;
-  const minutes = Math.floor(remaining / 60);
-  const seconds = remaining % 60;
-  return {months, days, hours, minutes, seconds, done:false};
+  if(target<=now) return {months:0,days:0,hours:0,minutes:0,seconds:0,totalDays:0,totalHours:0,totalMinutes:0,totalSeconds:0,done:true};
+  let months=(target.getFullYear()-now.getFullYear())*12+(target.getMonth()-now.getMonth());
+  const tentative=new Date(now);
+  tentative.setMonth(tentative.getMonth()+months);
+  if(tentative>target){months-=1;tentative.setMonth(tentative.getMonth()-1);}
+  let ms=target-tentative;
+  while(ms<0){months-=1;tentative.setMonth(tentative.getMonth()-1);ms=target-tentative;}
+  const sec=Math.floor(ms/1000);
+  let rem=sec;
+  const days=Math.floor(rem/(24*3600));rem%=(24*3600);
+  const hours=Math.floor(rem/3600);rem%=3600;
+  const minutes=Math.floor(rem/60);
+  const seconds=rem%60;
+  const totalMs=target-now;
+  const totalDays=Math.floor(totalMs/(24*3600*1000));
+  const totalRemSec=Math.floor(totalMs/1000)%(24*3600);
+  const totalHours=Math.floor(totalRemSec/3600);
+  const totalMinutes=Math.floor((totalRemSec%3600)/60);
+  const totalSeconds=totalRemSec%60;
+  return {months,days,hours,minutes,seconds,totalDays,totalHours,totalMinutes,totalSeconds,done:false};
 }
 
 function createCard(ev){
-  const card = document.createElement('article'); card.className = 'card'; card.setAttribute('role','listitem');
-  const thumb = document.createElement('div'); thumb.className = 'thumb';
-  const img = document.createElement('img'); img.src = ev.image; img.alt = `${ev.title} image`; thumb.appendChild(img);
-  const meta = document.createElement('div'); meta.className = 'meta';
-  const h = document.createElement('h2'); h.className = 'title'; h.textContent = ev.title;
-  const sub = document.createElement('p'); sub.className = 'date'; const target = new Date(ev.dateISO); sub.textContent = fmt.format(target);
-  const timer = document.createElement('div'); timer.className = 'timer'; timer.setAttribute('aria-live','polite');
-  const parts = ['Months','Days','Hours','Minutes','Seconds']; const slots = {};
-  parts.forEach((label, idx)=>{ const pill = document.createElement('div'); pill.className = 'pill' + (idx===0 ? ' accent' : '');
-    const num = document.createElement('span'); num.className = 'num'; num.textContent = '--';
-    const lab = document.createElement('span'); lab.className = 'lab'; lab.textContent = label.toLowerCase();
-    pill.appendChild(num); pill.appendChild(lab); timer.appendChild(pill); slots[label.toLowerCase()] = num; });
-  meta.appendChild(h); meta.appendChild(sub); meta.appendChild(timer);
-  card.appendChild(thumb); card.appendChild(meta);
-  return {card, slots};
-}
+  const card=document.createElement('article');
+  card.className='card'; card.setAttribute('role','listitem');
 
-const grid = document.getElementById('grid');
-const rows = events.map(ev => { const {card, slots} = createCard(ev); grid.appendChild(card); return {ev, slots, target: new Date(ev.dateISO), card}; });
+  // Hero
+  const hero=document.createElement('div'); hero.className='hero';
+  const img=document.createElement('img'); img.src=ev.image; img.alt=`${ev.title} image`;
+  hero.appendChild(img);
+  const heroTitle=document.createElement('h2'); heroTitle.className='hero-title'; heroTitle.textContent=ev.title;
+  hero.appendChild(heroTitle);
+  card.appendChild(hero);
 
-let ticker;
+  // Body
+  const body=document.createElement('div'); body.className='body';
+  const target=new Date(ev.dateISO);
+  const sub=document.createElement('p'); sub.className='date'; sub.textContent=fmt.format(target);
+  const timer=document.createElement('div'); timer.className='timer'; timer.setAttribute('aria-live','polite');
 
-function tick(){
-  const now = new Date();
-
-  rows.forEach(({slots, target, card})=>{
-    const d = diffAsParts(now, target);
-
-    if (d.done) {
-      if (!card.classList.contains('done')) {
-        card.classList.add('done');
-        const titleEl = card.querySelector('.title');
-        titleEl.textContent = titleEl.textContent.replace(/\s*• Completed$/, '') + ' • Completed';
-        card.style.opacity = 0.6;
-        slots.months.textContent  = '00';
-        slots.days.textContent    = '00';
-        slots.hours.textContent   = '00';
-        slots.minutes.textContent = '00';
-        slots.seconds.textContent = '00';
-      }
-      return; // skip further updates for completed cards
-    }
-
-    slots.months.textContent  = String(d.months).padStart(2,'0');
-    slots.days.textContent    = String(d.days).padStart(2,'0');
-    slots.hours.textContent   = String(d.hours).padStart(2,'0');
-    slots.minutes.textContent = String(d.minutes).padStart(2,'0');
-    slots.seconds.textContent = String(d.seconds).padStart(2,'0');
+  const parts=['Months','Days','Hours','Minutes','Seconds'];
+  const slots={}; const pillEls={};
+  parts.forEach((label,idx)=>{
+    const key=label.toLowerCase();
+    const pill=document.createElement('div');
+    pill.className='pill'+(idx===0?' accent':'');
+    pill.dataset.key=key;
+    const num=document.createElement('span'); num.className='num'; num.textContent='--';
+    const lab=document.createElement('span'); lab.className='lab'; lab.textContent=key;
+    pill.appendChild(num); pill.appendChild(lab); timer.appendChild(pill);
+    slots[key]=num; pillEls[key]=pill;
   });
 
-  const allDone = rows.every(({card}) => card.classList.contains('done'));
-  if (allDone && ticker) clearInterval(ticker);
+  body.appendChild(sub);
+  body.appendChild(timer);
+  card.appendChild(body);
+  return {card,slots,pillEls};
+}
+
+const grid=document.getElementById('grid');
+const gridCompleted=document.getElementById('gridCompleted');
+const completedBadge=document.getElementById('completedBadge');
+
+const rows=events.map(ev=>{
+  const {card,slots,pillEls}=createCard(ev);
+  grid.appendChild(card);
+  return {ev,slots,pillEls,target:new Date(ev.dateISO),card,completed:false};
+});
+
+let completedCount=0;
+
+// --- Tab logic ---
+let currentTab='upcoming';
+const tabUpcoming=document.getElementById('tabUpcoming');
+const tabCompleted=document.getElementById('tabCompleted');
+const segControl=document.getElementById('segControl');
+
+function switchTab(tab){
+  currentTab=tab;
+  const isUpcoming=tab==='upcoming';
+  tabUpcoming.classList.toggle('active',isUpcoming);
+  tabUpcoming.setAttribute('aria-selected',String(isUpcoming));
+  tabCompleted.classList.toggle('active',!isUpcoming);
+  tabCompleted.setAttribute('aria-selected',String(!isUpcoming));
+  grid.hidden=!isUpcoming;
+  gridCompleted.hidden=isUpcoming;
+  segControl.classList.toggle('hidden-ctrl',!isUpcoming);
+}
+
+tabUpcoming.addEventListener('click',()=>switchTab('upcoming'));
+tabCompleted.addEventListener('click',()=>switchTab('completed'));
+
+// --- Segmented control ---
+let currentMode='full';
+const btnFull=document.getElementById('btnFull');
+const btnCompact=document.getElementById('btnCompact');
+const segSlider=document.getElementById('segSlider');
+
+function positionSlider(activeBtn){
+  const cr=segControl.getBoundingClientRect();
+  const br=activeBtn.getBoundingClientRect();
+  segSlider.style.width=br.width+'px';
+  segSlider.style.transform=`translateX(${br.left-cr.left-3}px)`;
+}
+
+function applyMode(mode){
+  currentMode=mode;
+  rows.forEach(({pillEls,completed})=>{
+    if(completed)return;
+    Object.entries(pillEls).forEach(([key,pill])=>{
+      if(mode==='compact'&&COMPACT_HIDDEN.has(key)) pill.classList.add('hidden');
+      else pill.classList.remove('hidden');
+    });
+  });
+  btnFull.classList.toggle('active',mode==='full');
+  btnCompact.classList.toggle('active',mode==='compact');
+  positionSlider(mode==='full'?btnFull:btnCompact);
+}
+
+btnFull.addEventListener('click',()=>{applyMode('full');tick();});
+btnCompact.addEventListener('click',()=>{applyMode('compact');tick();});
+
+requestAnimationFrame(()=>{
+  segSlider.style.transition='none';
+  positionSlider(btnFull);
+  requestAnimationFrame(()=>{segSlider.style.transition='';});
+});
+window.addEventListener('resize',()=>positionSlider(currentMode==='full'?btnFull:btnCompact));
+
+// --- Tick ---
+let ticker;
+
+function updateEmptyState(){
+  const existing=grid.querySelector('.empty-state');
+  if(existing) grid.removeChild(existing);
+  if(grid.querySelectorAll('.card').length===0){
+    const empty=document.createElement('div');
+    empty.className='empty-state';
+    empty.textContent='All events completed — check the Completed tab.';
+    grid.appendChild(empty);
+  }
+}
+
+function tick(){
+  const now=new Date();
+  const isCompact=currentMode==='compact';
+
+  rows.forEach(row=>{
+    const {slots,target,card}=row;
+    const d=diffAsParts(now,target);
+
+    if(d.done){
+      if(!row.completed){
+        row.completed=true;
+        completedCount++;
+        completedBadge.textContent=completedCount;
+        card.classList.add('done-card');
+        Object.values(row.pillEls).forEach(pill=>pill.classList.remove('hidden'));
+        slots.months.textContent='00';
+        slots.days.textContent='00';
+        slots.hours.textContent='00';
+        slots.minutes.textContent='00';
+        slots.seconds.textContent='00';
+        setTimeout(()=>{
+          if(card.parentNode===grid) grid.removeChild(card);
+          gridCompleted.appendChild(card);
+          updateEmptyState();
+        },800);
+      }
+      return;
+    }
+
+    if(isCompact){
+      slots.days.textContent=String(d.totalDays);
+      slots.hours.textContent=String(d.totalHours).padStart(2,'0');
+      slots.minutes.textContent=String(d.totalMinutes).padStart(2,'0');
+      slots.seconds.textContent=String(d.totalSeconds).padStart(2,'0');
+    } else {
+      slots.months.textContent=String(d.months).padStart(2,'0');
+      slots.days.textContent=String(d.days).padStart(2,'0');
+      slots.hours.textContent=String(d.hours).padStart(2,'0');
+      slots.minutes.textContent=String(d.minutes).padStart(2,'0');
+      slots.seconds.textContent=String(d.seconds).padStart(2,'0');
+    }
+  });
+
+  const allDone=rows.every(r=>r.completed);
+  if(allDone&&ticker)clearInterval(ticker);
 }
 
 tick();
-ticker = setInterval(tick, 1000);
+ticker=setInterval(tick,1000);
 </script>
 </body>
 </html>
